@@ -44,8 +44,8 @@ def main():
         "--role",
         "-r",
         choices=["auditor", "coach", "debater", "auto"],
-        default="coach",
-        help="Rol asignado a la Skill generada: auditor, coach, debater (por defecto: coach)",
+        default="auto",
+        help="Rol asignado a la Skill generada: auditor, coach, debater, auto (por defecto: auto - detección inteligente)",
     )
     parser.add_argument(
         "--arena",

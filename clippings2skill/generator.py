@@ -2,8 +2,8 @@
 generator.py
 ============
 Generador de artefactos de Skill para IA (SKILL.md, dataset.json, knowledge.md),
-con soporte para múltiples roles (Auditor, Coach, Debater), Arena de Debate entre libros
-y la Regla Fundamental de Juicio Crítico Humano.
+con soporte para múltiples roles (Auditor, Coach, Debater), asignación automática
+inteligente por naturaleza del libro, Arena de Debate y la Regla de Juicio Crítico Humano.
 """
 
 import os
@@ -56,16 +56,46 @@ CRITICAL_JUDGMENT_RULE = """
 """
 
 
+def detect_role_for_book(book_title: str, clips: List[Dict[str, Any]]) -> str:
+    title_lower = book_title.lower()
+
+    # Technical / Methodological / Software Engineering -> Auditor
+    auditor_keywords = [
+        "tdd", "ddd", "agile", "growth", "impact", "code", "clean",
+        "refactoring", "domain-driven", "architecture", "design",
+        "desarrollo", "software", "programación", "métricas"
+    ]
+    for kw in auditor_keywords:
+        if kw in title_lower:
+            return "auditor"
+
+    # Philosophical / Political / Critical / Essay -> Debater
+    debater_keywords = [
+        "marx", "antifrágil", "antifragil", "taleb", "pensamiento crítico",
+        "filosofía", "política", "no seas tú mismo", "applebaum", "social",
+        "capitalismo", "ideología", "ensayo"
+    ]
+    for kw in debater_keywords:
+        if kw in title_lower:
+            return "debater"
+
+    # Default for reflective / history / personal development -> Coach
+    return "coach"
+
+
 def generate_skill_for_book(
     book_title: str,
     clips: List[Dict[str, Any]],
-    role: str = "coach",
+    role: str = "auto",
     output_dir: str = "skills"
 ) -> str:
     if not clips:
         raise ValueError(f"No hay recortes para el libro '{book_title}'")
 
     role_key = role.lower()
+    if role_key == "auto":
+        role_key = detect_role_for_book(book_title, clips)
+
     if role_key not in ROLE_PROMPTS:
         role_key = "coach"
 
@@ -100,7 +130,7 @@ def generate_skill_for_book(
     with open(knowledge_path, "w", encoding="utf-8") as f:
         f.write(f"# 📚 Evidencias de Lectura: {book_title}\n\n")
         f.write(f"**Autor:** {author}\n")
-        f.write(f"**Rol asignado:** {role_info['title']}\n")
+        f.write(f"**Rol asignado:** {role_info['title']} ({role_key})\n")
         f.write(f"**Total de recortes:** {len(clips)}\n\n")
         f.write("---\n\n")
         for i, c in enumerate(clips, 1):
@@ -150,7 +180,6 @@ def generate_arena_skill(
     skill_dir = os.path.join(output_dir, slug)
     os.makedirs(skill_dir, exist_ok=True)
 
-    # Group by book
     books = {}
     for c in all_clips:
         bt = c["book_title"]
@@ -158,7 +187,6 @@ def generate_arena_skill(
             books[bt] = {"author": c["author"], "clips": []}
         books[bt]["clips"].append(c)
 
-    # Write arena dataset
     dataset_path = os.path.join(skill_dir, "dataset.json")
     dataset_data = {
         "arena_title": "Arena de Debate Multilibro",
@@ -176,7 +204,6 @@ def generate_arena_skill(
     with open(dataset_path, "w", encoding="utf-8") as f:
         json.dump(dataset_data, f, ensure_ascii=False, indent=2)
 
-    # Write SKILL.md for Arena
     skill_path = os.path.join(skill_dir, "SKILL.md")
     books_summary = "\n".join([f"- **{bt}** ({data['author']}): {len(data['clips'])} recortes" for bt, data in books.items()])
 
