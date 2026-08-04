@@ -27,6 +27,10 @@ My Clippings.txt
 *.clippings.txt
 !tests/sample_clippings.txt
 
+# Generated Skills from Copyrighted Books (DO NOT COMMIT USER SKILLS)
+skills/*
+!skills/clippings2skill/
+
 # Local IDEs & Multi-LLM Agent Folders
 .gemini/
 .claude/
