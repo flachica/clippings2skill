@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# User Kindle Data & Secrets (DO NOT COMMIT PERSONAL CLIPPINGS)
+My Clippings.txt
+*.clippings.txt
+!tests/sample_clippings.txt
+
+# Local IDEs & Multi-LLM Agent Folders
+.gemini/
+.claude/
+.opencode/
+.vscode/
+.idea/
+.venv/
