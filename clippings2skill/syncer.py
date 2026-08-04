@@ -28,6 +28,18 @@ def sync_skills(repo_root: str = ".") -> List[str]:
         target_base = root_path / target_rel
         target_base.mkdir(parents=True, exist_ok=True)
 
+        valid_skill_names = {d.name for d in skill_folders}
+
+        # Limpieza de symlinks/carpetas huérfanas
+        for existing in target_base.iterdir():
+            if existing.name not in valid_skill_names:
+                if existing.is_symlink() or not existing.is_dir():
+                    existing.unlink()
+                    logs.append(f"🗑️ [Eliminado Huérfano] {target_rel}/{existing.name}")
+                elif existing.is_dir():
+                    shutil.rmtree(existing)
+                    logs.append(f"🗑️ [Eliminado Huérfano] {target_rel}/{existing.name}")
+
         for skill_dir in skill_folders:
             skill_name = skill_dir.name
             target_link = target_base / skill_name
