@@ -55,6 +55,14 @@ CRITICAL_JUDGMENT_RULE = """
 > *"⚠️ Un humano nunca debe dimitir de su juicio crítico. Para tomar una decisión con criterio sobre este asunto, es fundamental que domines las siguientes bases extraídas de tus lecturas que parecen no estar asumidas en tu planteamiento: [Base 1, Base 2]..."*
 """
 
+COPYRIGHT_WARNING_TEMPLATE = """
+> [!WARNING]
+> **Aviso de Propiedad Intelectual y Uso Personal**:
+> Este documento contiene recortes y citas textuales de la obra **"{book_title}"** de **{author}**, protegida por derechos de autor (*copyright*).
+> Ha sido generado automáticamente para el **estudio privado, consulta interactiva y uso estrictamente personal** del usuario (Fair Use / Derecho de Cita).
+> **Queda totalmente prohibida su distribución pública, publicación en repositorios abiertos (como GitHub) o comercialización.**
+"""
+
 
 def detect_role_for_book(book_title: str, clips: List[Dict[str, Any]]) -> str:
     title_lower = book_title.lower()
@@ -125,6 +133,8 @@ def generate_skill_for_book(
     with open(dataset_path, "w", encoding="utf-8") as f:
         json.dump(dataset_data, f, ensure_ascii=False, indent=2)
 
+    warning_msg = COPYRIGHT_WARNING_TEMPLATE.format(book_title=book_title, author=author)
+
     # 2. knowledge.md
     knowledge_path = os.path.join(skill_dir, "knowledge.md")
     with open(knowledge_path, "w", encoding="utf-8") as f:
@@ -132,6 +142,7 @@ def generate_skill_for_book(
         f.write(f"**Autor:** {author}\n")
         f.write(f"**Rol asignado:** {role_info['title']} ({role_key})\n")
         f.write(f"**Total de recortes:** {len(clips)}\n\n")
+        f.write(warning_msg + "\n")
         f.write("---\n\n")
         for i, c in enumerate(clips, 1):
             f.write(f"### Recorte #{i} (Página/Posición: {c['page']})\n")
@@ -150,6 +161,8 @@ description: Skill de {role_info['title']} basada en '{book_title}' de {author}.
 
 > **Rol**: Eres un {role_info['title']} respaldado por los recortes y evidencias del libro **{book_title}** ({author}).
 > {role_info['description']}
+
+{warning_msg}
 
 ---
 
